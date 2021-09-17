@@ -1,184 +1,160 @@
-import * as React from "react"
+import React, { useEffect, useState, useRef } from 'react';
+import styled from 'styled-components';
+
+import variables from '../variables/variables';
+import './styles.scss';
+
+import Board from '../components/Board';
+import ActionZone from '../components/ActionsZone';
+import ActionButton from '../components/ActionButton';
+import Countdown from '../components/Countdown';
+import Toolbar from '../components/Toolbar';
+import { ThemeContext, themes, languages } from '../theme/Themes';
+import Toggler from '../components/Toggler';
+import LanguageButton from '../components/LanguageButton';
+
+const { font_sizes, font_weights, game_colors } = variables;
 
 // styles
-const pageStyles = {
-  color: "#232129",
-  padding: 96,
-  fontFamily: "-apple-system, Roboto, sans-serif, serif",
-}
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
-}
-const headingAccentStyles = {
-  color: "#663399",
-}
-const paragraphStyles = {
-  marginBottom: 48,
-}
-const codeStyles = {
-  color: "#8A6534",
-  padding: 4,
-  backgroundColor: "#FFF4DB",
-  fontSize: "1.25rem",
-  borderRadius: 4,
-}
-const listStyles = {
-  marginBottom: 96,
-  paddingLeft: 0,
-}
-const listItemStyles = {
-  fontWeight: 300,
-  fontSize: 24,
-  maxWidth: 560,
-  marginBottom: 30,
-}
+const Main = styled.div`
+    background-color: ${props => props.theme.background};
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+`;
 
-const linkStyle = {
-  color: "#8954A8",
-  fontWeight: "bold",
-  fontSize: 16,
-  verticalAlign: "5%",
-}
+const Container = styled.div`
+    width: 550px;
+    flex: 1;
+    margin: auto;
+    padding: 32px 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    @media only screen and (max-width: 650px) {
+        width: calc(100% - 64px);
+    }
+`;
 
-const docLinkStyle = {
-  ...linkStyle,
-  listStyleType: "none",
-  marginBottom: 24,
-}
+const Title = styled.span`
+    font-size: ${font_sizes.title};
+    font-weight: ${font_weights.bold};
+    color: ${props => props.theme.color};
+`;
 
-const descriptionStyle = {
-  color: "#232129",
-  fontSize: 14,
-  marginTop: 10,
-  marginBottom: 0,
-  lineHeight: 1.25,
-}
+const game_color_list = Object.keys(game_colors).map((key) => key);
 
-const docLink = {
-  text: "Documentation",
-  url: "https://www.gatsbyjs.com/docs/",
-  color: "#8954A8",
-}
+const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+};
 
-const badgeStyle = {
-  color: "#fff",
-  backgroundColor: "#088413",
-  border: "1px solid #088413",
-  fontSize: 11,
-  fontWeight: "bold",
-  letterSpacing: 1,
-  borderRadius: 4,
-  padding: "4px 6px",
-  display: "inline-block",
-  position: "relative",
-  top: -2,
-  marginLeft: 10,
-  lineHeight: 1,
-}
+const generate_board_data = () => (
+    Array.from({ length: 35 }).map(() => {
+        const random_index = getRandomInt(0, 5);
+        const random_color = game_color_list[random_index];
 
-// data
-const links = [
-  {
-    text: "Tutorial",
-    url: "https://www.gatsbyjs.com/docs/tutorial/",
-    description:
-      "A great place to get started if you're new to web development. Designed to guide you through setting up your first Gatsby site.",
-    color: "#E95800",
-  },
-  {
-    text: "How to Guides",
-    url: "https://www.gatsbyjs.com/docs/how-to/",
-    description:
-      "Practical step-by-step guides to help you achieve a specific goal. Most useful when you're trying to get something done.",
-    color: "#1099A8",
-  },
-  {
-    text: "Reference Guides",
-    url: "https://www.gatsbyjs.com/docs/reference/",
-    description:
-      "Nitty-gritty technical descriptions of how Gatsby works. Most useful when you need detailed information about Gatsby's APIs.",
-    color: "#BC027F",
-  },
-  {
-    text: "Conceptual Guides",
-    url: "https://www.gatsbyjs.com/docs/conceptual/",
-    description:
-      "Big-picture explanations of higher-level Gatsby concepts. Most useful for building understanding of a particular topic.",
-    color: "#0D96F2",
-  },
-  {
-    text: "Plugin Library",
-    url: "https://www.gatsbyjs.com/plugins",
-    description:
-      "Add functionality and customize your Gatsby site or app with thousands of plugins built by our amazing developer community.",
-    color: "#8EB814",
-  },
-  {
-    text: "Build and Host",
-    url: "https://www.gatsbyjs.com/cloud",
-    badge: true,
-    description:
-      "Now you’re ready to show the world! Give your Gatsby site superpowers: Build and host on Gatsby Cloud. Get started for free!",
-    color: "#663399",
-  },
-]
+        const extracted_color_list = game_color_list.filter((i) => i !== random_color); // new color list without the chosen color name
+        const false_color_index = getRandomInt(0, 4); // index of the false color
+        const false_color = extracted_color_list[false_color_index];
+        const false_color_obj = game_colors[false_color];
 
-// markup
+        return { value: random_color, color: false_color_obj.value };
+    })
+);
+
 const IndexPage = () => {
-  return (
-    <main style={pageStyles}>
-      <title>Home Page</title>
-      <h1 style={headingStyles}>
-        Congratulations
-        <br />
-        <span style={headingAccentStyles}>— you just made a Gatsby site! </span>
-        <span role="img" aria-label="Party popper emojis">
-          🎉🎉🎉
-        </span>
-      </h1>
-      <p style={paragraphStyles}>
-        Edit <code style={codeStyles}>src/pages/index.js</code> to see this page
-        update in real-time.{" "}
-        <span role="img" aria-label="Sunglasses smiley emoji">
-          😎
-        </span>
-      </p>
-      <ul style={listStyles}>
-        <li style={docLinkStyle}>
-          <a
-            style={linkStyle}
-            href={`${docLink.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
-          >
-            {docLink.text}
-          </a>
-        </li>
-        {links.map(link => (
-          <li key={link.url} style={{ ...listItemStyles, color: link.color }}>
-            <span>
-              <a
-                style={linkStyle}
-                href={`${link.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
-              >
-                {link.text}
-              </a>
-              {link.badge && (
-                <span style={badgeStyle} aria-label="New Badge">
-                  NEW!
-                </span>
-              )}
-              <p style={descriptionStyle}>{link.description}</p>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <img
-        alt="Gatsby G Logo"
-        src="data:image/svg+xml,%3Csvg width='24' height='24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2a10 10 0 110 20 10 10 0 010-20zm0 2c-3.73 0-6.86 2.55-7.75 6L14 19.75c3.45-.89 6-4.02 6-7.75h-5.25v1.5h3.45a6.37 6.37 0 01-3.89 4.44L6.06 9.69C7 7.31 9.3 5.63 12 5.63c2.13 0 4 1.04 5.18 2.65l1.23-1.06A7.959 7.959 0 0012 4zm-8 8a8 8 0 008 8c.04 0 .09 0-8-8z' fill='%23639'/%3E%3C/svg%3E"
-      />
-    </main>
-  )
+    const [is_playing, set_is_playing] = useState(false);
+    const [remaining, set_remaining] = useState(20);
+    const [theme, set_theme] = useState({});
+    const [language, set_language] = useState({});
+    const [board_data, set_board_data] = useState(generate_board_data());
+
+    const timeout = useRef(null);
+
+    useEffect(() => {
+        let init_theme = null;
+        let init_language = null;
+        if (typeof window !== 'undefined') {
+            init_theme = window.localStorage.getItem('theme');
+            init_language = window.localStorage.getItem('language');
+        };
+        set_theme(themes[init_theme || 'light']);
+        set_language(languages[init_language || 'en']);
+        document.getElementsByTagName('BODY')[0].classList.toggle(init_theme);
+    }, []);
+
+    useEffect(() => {
+        if (is_playing) {
+            timeout.current = setInterval(() => {
+                set_remaining(remaining - 1);
+            }, 1000);
+        } else {
+            set_remaining(20);
+        };
+        if (remaining === 0) {
+            clearInterval(timeout.current);
+            set_is_playing(false);
+        }
+        return () => { clearInterval(timeout.current); }
+    }, [is_playing, remaining]);
+
+    const onClick = (type) => {
+        switch (type) {
+            case 'play':
+                set_is_playing(true);
+                break;
+            case 'reset':
+                set_remaining(20);
+                set_is_playing(false);
+                set_board_data(generate_board_data(language));
+                break;
+            case 'toggle_theme': {
+                const new_theme = theme === themes.light ? themes.dark : themes.light;
+                document.getElementsByTagName('BODY')[0].classList.replace(theme.name, new_theme.name);
+                set_theme(new_theme);
+                window.localStorage.setItem('theme', new_theme.name);
+            } break;
+            case 'change_language': {
+                const new_language = language === languages.en ? languages.vi : languages.en;
+                set_language(new_language);
+                window.localStorage.setItem('language', new_language.name);
+            } break;
+            default: break;
+        }
+    };
+
+    const buttons = [
+        { label: language.play, onClick: () => onClick('play'), is_play_button: true },
+        { label: language.reset, onClick: () => onClick('reset') },
+    ]
+
+    return (
+        <div>
+            {!!language.name && !!theme.name
+                &&
+                <Main theme={theme}>
+                    <ThemeContext.Provider value={{ theme, language }}>
+                        <Toolbar>
+                            <LanguageButton change_language={() => onClick('change_language')} />
+                            <Toggler toggle_theme={() => onClick('toggle_theme')} />
+                        </Toolbar>
+                        <Container>
+                            <Title theme={theme}>{language.title}</Title>
+                            <Board board_data={board_data} />
+                            <Countdown remaining={remaining} />
+                            <ActionZone>
+                                {buttons.map((b, idx) => <ActionButton key={idx} {...b} is_playing={is_playing} />)}
+                            </ActionZone>
+                        </Container>
+                    </ThemeContext.Provider>
+                </Main>
+            }
+        </div>
+    )
 }
 
-export default IndexPage
+export default IndexPage;

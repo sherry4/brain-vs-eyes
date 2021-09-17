@@ -1,0 +1,20 @@
+$dark-bg: #282C34;
+$light-bg: #b9e9ff;
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0 !important;
+}
+
+* { 
+    box-sizing: border-box;
+    transition: color 0.2s ease-out, background 0.2s ease-out;
+}
+
+.dark {
+    background-color: $dark-bg;
+}
+
+.light {
+    background-color: $light-bg;
+}

@@ -3,5 +3,5 @@ module.exports = {
     siteUrl: "https://www.yourdomain.tld",
     title: "Brain vs Eyes",
   },
-  plugins: ["gatsby-plugin-styled-components", "gatsby-plugin-gatsby-cloud"],
+  plugins: ["gatsby-plugin-styled-components", "gatsby-plugin-gatsby-cloud", "gatsby-plugin-sass"],
 };
