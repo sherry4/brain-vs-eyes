@@ -17,6 +17,10 @@ const BoardContainer = styled.div`
     grid-template-rows: repeat(7, 1fr);
     border-radius: ${border_radius.board};
     margin-top: ${margins.top};
+    @media only screen and (max-width: 768px) {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+    }
 `;
 
 const Board = (props) => {
