@@ -42,6 +42,9 @@ const Title = styled.span`
     font-size: ${font_sizes.title};
     font-weight: ${font_weights.bold};
     color: ${props => props.theme.color};
+    @media only screen and (max-width: 768px) {
+        font-size: 2.5rem;
+    }
 `;
 
 const game_color_list = Object.keys(game_colors).map((key) => key);
@@ -90,17 +93,20 @@ const IndexPage = () => {
     useEffect(() => {
         if (is_playing) {
             timeout.current = setInterval(() => {
-                set_remaining(remaining - 1);
+                set_remaining(remaining => remaining - 1);
             }, 1000);
         } else {
             set_remaining(20);
         };
+        return () => { clearInterval(timeout.current); }
+    }, [is_playing]);
+
+    useEffect(() => {
         if (remaining === 0) {
             clearInterval(timeout.current);
             set_is_playing(false);
         }
-        return () => { clearInterval(timeout.current); }
-    }, [is_playing, remaining]);
+    }, [remaining]);
 
     const onClick = (type) => {
         switch (type) {
@@ -130,7 +136,7 @@ const IndexPage = () => {
     const buttons = [
         { label: language.play, onClick: () => onClick('play'), is_play_button: true },
         { label: language.reset, onClick: () => onClick('reset') },
-    ]
+    ];
 
     return (
         <div>

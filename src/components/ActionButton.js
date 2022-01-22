@@ -25,6 +25,9 @@ const ButtonLabel = styled.span`
     font-size: ${font_sizes.button};
     color: ${colors.white};
     font-family: inherit;
+    @media only screen and (max-width: 768px) {
+        font-size: 1.5rem;
+    }
 `;
 
 const ActionButton = (props) => {

@@ -17,6 +17,9 @@ const ItemText = styled.span`
     color: ${props => props.color};
     font-size: ${font_sizes.item};
     font-weight: ${font_weights.bold};
+    @media only screen and (max-width: 768px) {
+        font-size: 1rem;
+    }
 `;
 
 const BoardItem = (props) => {
